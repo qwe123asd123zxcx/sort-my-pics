@@ -3,4 +3,7 @@ __pycache__/
 *.pyc
 .idea/
 .DS_Store
-models/
+models/*
+!models/.gitkeep
+data/input/
+data/output/

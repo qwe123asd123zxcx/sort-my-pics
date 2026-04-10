@@ -13,7 +13,7 @@ OUTPUT_DIR = os.path.join(BASE_DIR, "data", "output")
 #IMG_SIZE = (224, 224)
 
 # 聚类配置
-#NUM_CLUSTERS = 5  # 假设我们想分成5类，也可以设为None让其自动寻找最优K
+#NUM_CLUSTERS = 5
 #RANDOM_STATE = 42
 
 # 文件操作模式: 'copy' 或 'move'

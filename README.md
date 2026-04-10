@@ -1,5 +1,8 @@
 # ImageSorter: 基于 CLIP 的智能图片分类工具
 
+![version](https://img.shields.io/badge/version-0.2.0-green)
+![version](https://img.shields.io/badge/python-3.8+-blue)
+
 这是一个基于 OpenAI CLIP (中文版) 实现的图片自动分类脚本。
 能够根据图片内容，将其自动归类到 **人物、风景、动物、其他** 四个文件夹中。
 

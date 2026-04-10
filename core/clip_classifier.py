@@ -81,6 +81,15 @@ class CLIPClassifier:
             print(f"处理图片失败 {image_path}: {e}")
             return None
 
+    def predict(self, image_path):
+        """
+        统一对外接口
+        """
+        result = self.predict_single(image_path)
+        if result is None:
+            raise ValueError(f"Failed to predict {image_path}")
+        return result
+
     def batch_predict(self, image_paths):
         """批量预测"""
         results = []
