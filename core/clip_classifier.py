@@ -1,10 +1,9 @@
 # core/clip_classifier.py
 import torch
-import cn_clip.clip as clip
 from cn_clip.clip import load_from_name, tokenize
-from PIL import Image
 import os
 from config import CLIP_MODEL_NAME, CLASS_LABELS, CLASS_DIR_NAMES,MODEL_DIR
+from utils.image_utils import load_image_opencv, resize_and_normalize_for_clip
 
 
 class CLIPClassifier:
@@ -54,17 +53,20 @@ class CLIPClassifier:
         return text_features
 
     """编码中文文本"""
+
     def predict_single(self, image_path):
-        """对单张图片分类"""
         try:
-            image = Image.open(image_path).convert("RGB")
-            image_input = self.preprocess(image).unsqueeze(0).to(self.device)
+            # 1. OpenCV 读图
+            img_bgr = load_image_opencv(image_path)
+
+            # 2. 预处理
+            img_tensor = resize_and_normalize_for_clip(img_bgr)
+            img_tensor = torch.from_numpy(img_tensor).unsqueeze(0).to(self.device)
 
             with torch.no_grad():
-                image_features = self.model.encode_image(image_input)
+                image_features = self.model.encode_image(img_tensor)
                 image_features = image_features / image_features.norm(dim=-1, keepdim=True)
 
-            # 计算相似度
             similarity = (image_features @ self.text_features.T).squeeze(0)
             best_idx = similarity.argmax().item()
             best_score = similarity[best_idx].item()

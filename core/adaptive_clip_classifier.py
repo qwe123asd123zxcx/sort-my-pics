@@ -2,7 +2,6 @@
 import torch
 import torch.nn as nn
 from cn_clip.clip import load_from_name
-from PIL import Image
 import os
 from config import (
     CLIP_MODEL_NAME,
@@ -10,6 +9,7 @@ from config import (
     CLASS_DIR_NAMES
 )
 from core.adaptive_head import AdaptiveHead
+from utils.image_utils import load_image_opencv, resize_and_normalize_for_clip
 
 
 class AdaptiveCLIPClassifier:
@@ -49,11 +49,12 @@ class AdaptiveCLIPClassifier:
 
     # ---------- 推理 ----------
     def predict(self, image_path):
-        image = Image.open(image_path).convert("RGB")
-        img = self.preprocess(image).unsqueeze(0).to(self.device)
+        img_bgr = load_image_opencv(image_path)
+        img_tensor = resize_and_normalize_for_clip(img_bgr)
+        img_tensor = torch.from_numpy(img_tensor).unsqueeze(0).to(self.device)
 
         with torch.no_grad():
-            feat = self.model.encode_image(img)
+            feat = self.model.encode_image(img_tensor)
             logits = self.head(feat)
 
         pred = logits.argmax(dim=-1).item()
@@ -67,16 +68,14 @@ class AdaptiveCLIPClassifier:
 
     # ---------- 反向传播 ----------
     def update(self, image_path, true_label_idx):
-        """
-        true_label_idx: int (0~3)
-        """
-        image = Image.open(image_path).convert("RGB")
-        img = self.preprocess(image).unsqueeze(0).to(self.device)
+        img_bgr = load_image_opencv(image_path)
+        img_tensor = resize_and_normalize_for_clip(img_bgr)
+        img_tensor = torch.from_numpy(img_tensor).unsqueeze(0).to(self.device)
+
         label = torch.tensor([true_label_idx]).to(self.device)
 
         self.optimizer.zero_grad()
-
-        feat = self.model.encode_image(img)
+        feat = self.model.encode_image(img_tensor)
         logits = self.head(feat)
 
         loss = self.criterion(logits, label)
