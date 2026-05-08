@@ -5,5 +5,3 @@ __pycache__/
 .DS_Store
 models/*
 !models/.gitkeep
-data/input/
-data/output/
